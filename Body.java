@@ -23,9 +23,18 @@ public class Body {
 	}
 	public void calcRadius()
 	{
-		double sMass = mass/solarmass;
-		double sRadius = Math.pow(sMass,0.8);
-		radius = sRadius * solarradii;
+		
+		
+		if(starClass == "Black Hole")
+		{
+			double sMass = mass/solarmass;
+			double sRadius = Math.pow(sMass,0.8);
+			radius = sRadius * solarradii;
+		}
+		else
+		{
+			radius = mass/4e10;
+		}
 	}
 	public String getStarClass()
 	{
@@ -33,7 +42,9 @@ public class Body {
 	}
 	public void update(double dt)
 	{
-			
+		
+		if(starClass != "Black Hole")
+		{
 		vx += dt * fx / mass;
 		vy += dt * fy /mass;
 		
@@ -51,6 +62,7 @@ public class Body {
 			
 		rx += dt * vx;
 		ry += dt * vy;
+		}
 	}
 	
 	public double distanceTo(Body b)
@@ -69,7 +81,8 @@ public class Body {
 	public void addForce(Body b)
 	{
 		Body a = this;
-		double EPS = 3E4;
+		//double EPS = 3E1;
+		double EPS = 1;
 		double dx = b.rx - a.rx;
 		double dy = b.ry - a.ry;
 		double dist = Math.sqrt(dx*dx + dy*dy);
@@ -86,6 +99,11 @@ public class Body {
 		{
 			collision = true;
 			//System.out.println("Collision: " + this.starClass + " with " + b.starClass);
+			if(this.starClass != "Black Hole")
+			{
+				if(b.starClass != "Black Hole")
+					System.out.println("Collision: " + this.starClass + " with " + b.starClass);
+			}
 		}
 		
 		

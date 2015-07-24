@@ -9,33 +9,52 @@ public class GravMain {
 	public static ArrayList<Star> stars;
 	public static Body bodies[];
 	public static int collisionCount = 0;
+	public static double BHoleMass = 0;
+	public static String inputPath = "";
+	public static String outputPath = "";
+	public static double TimeStep = 0;
+	
 	public static void main(String[] args) 
 	{
-		stars = new ArrayList<Star>();
-		readFile();
-		bodies = new Body[stars.size() + 1];
-		start();
-		int maxSteps = 1000000000;
-		int writeOutCount = 0;
+		String[] configs = readConfig();
+		
+		try{
+			BHoleMass = Double.parseDouble(configs[2]);
+			inputPath = configs[3];
+			TimeStep = Double.parseDouble(configs[4]);
+			outputPath = configs[5];
+		
+			stars = new ArrayList<Star>();
+			readFile();
+			bodies = new Body[stars.size() + 1];
+			start();
+			int maxSteps = Integer.parseInt(configs[0]);
+			int writeOutCount = 0;
+			int writeOutValue = Integer.parseInt(configs[1]);
 
-		for(int i = 0; i < maxSteps; i++)
-		{
-			addforces(bodies.length);
-			writeOutCount++;
-			if(writeOutCount > 5)
+			for(int i = 0; i < maxSteps; i++)
 			{
-				writeOut();
-				writeOutCount = 0;
-				//System.out.println(i + " Collisions: " + collisionCount);
-			}
+				addforces(bodies.length);
+				writeOutCount++;
+				if(writeOutCount >= writeOutValue)
+				{
+					writeOut();
+					writeOutCount = 0;
+					//System.out.println(i + " Collisions: " + collisionCount);
+				}
 				
 		
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println("Config error");
 		}
 	}
 	public static void start()
 	{
 		double solarmass = 1.98892e30;
-		double blackHoleMass = 8e3*solarmass;
+		double blackHoleMass = BHoleMass;
 		Body BH = new Body(0,0,0,0,(blackHoleMass),"Black Hole");
 		bodies[0] = BH;
 		//bodies[1] = new Body(0,0,0,0,(1e1*solarmass), "Black Hole");
@@ -52,10 +71,12 @@ public class GravMain {
 			double vx   = -1*Math.signum(py)*Math.cos(thetav)*magv;
 		    double vy   = Math.signum(px)*Math.sin(thetav)*magv;
 		    
+		    /*
 		    if (Math.random() <=.5) {
 	              vx=-vx;
 	              vy=-vy;
 	            }
+	        */
 		    
 		    //double mass = stars.get(i).getMass() * solarmass;
 		   
@@ -76,6 +97,7 @@ public class GravMain {
 					{
 						bodies[i].addForce(bodies[j]);
 					
+					  
 						if(bodies[i].checkCollision(bodies[j]))
 						{
 							//System.out.println("Collision");
@@ -93,6 +115,7 @@ public class GravMain {
 								bodies[i].mass = 0.0;
 							}
 						}
+						
 					}
 				}
 			}
@@ -102,7 +125,7 @@ public class GravMain {
 			if(bodies[i].mass > 0)
 			{
 				//bodies[i].update(1e11);
-				bodies[i].update(1e01);
+				bodies[i].update(TimeStep);
 			}
 		}
 	}
@@ -124,7 +147,7 @@ public class GravMain {
 	}
 	public static void readFile()
 	{
-		String path = "/var/www/html/simoutput/output.csv";
+		String path = inputPath;
 		BufferedReader br = null;
 		String line = "";
 		String delim = ",";
@@ -132,7 +155,8 @@ public class GravMain {
 		try{
 			br = new BufferedReader(new FileReader(path));
 			while((line = br.readLine())!= null)
-			{				
+			{
+				//System.out.println(line);
 				String[] input = line.split(delim);
 				if(!input[0].contains("X"))
 				{	
@@ -148,7 +172,7 @@ public class GravMain {
     {
     	 try
         {
-            PrintWriter writer = new PrintWriter("/var/www/html/simoutput/grav_output.csv","UTF-8");
+            PrintWriter writer = new PrintWriter(outputPath,"UTF-8");
         
         	writer.println("X,Y,Size,Class");
             for(Body b : bodies)
@@ -166,6 +190,74 @@ public class GravMain {
             System.out.println("error");
         }
     }
+     public static String[] readConfig()
+	{
+	    String[] configs = new String[6];
+		String path = "config.cfg";
+		BufferedReader br = null;
+		String line = "";
+		String comment = "#";
+		
+		try
+		{
+			br = new BufferedReader(new FileReader(path));
+			while((line = br.readLine())!= null)
+			{
+			    if(!line.contains(comment))
+			    {
+				    if(line.contains("MaxSteps"))
+				    {  
+				        String[] t = line.split("=");
+				        configs[0] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("WriteOutValue"))
+				    {   
+				        String[] t = line.split("=");
+				        configs[1] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("BlackHoleMass"))
+				    {   
+				        String[] t = line.split("=");
+				        configs[2] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("InputPath"))
+				    {   
+				        String[] t = line.split("=");
+				        configs[3] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("TimeStep"))
+				    {   
+				        String[] t = line.split("=");
+				        configs[4] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("OutputDir"))
+				    {   
+				        String[] t = line.split("=");
+				        configs[5] = t[1].substring(1).trim();
+				    }
+				    
+			    }
+			}
+			for(int i = 0; i < configs.length; i++)
+		    {
+		        System.out.println(configs[i]);
+		    }
+			
+		}
+		catch(Exception e)
+		{
+		    System.out.println("Error reading Config");
+		    System.out.println(e.getMessage());
+		}
+		
+		return configs;
+		
+	}
 
 }
 

@@ -5,6 +5,7 @@ public class Star {
 	private double Y;
 	private String sClass;
 	private double M;
+	private double PM;
 	
 	
 	public Star(double X, double Y, String sClass, double M)
