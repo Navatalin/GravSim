@@ -2,7 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-
+import java.io.IOException;
 
 public class GravMain {
 
@@ -13,6 +13,8 @@ public class GravMain {
 	public static String inputPath = "";
 	public static String outputPath = "";
 	public static double TimeStep = 0;
+	public static int imgCount = 0;
+	public static double maxx, maxy = 0;
 	
 	public static void main(String[] args) 
 	{
@@ -40,28 +42,41 @@ public class GravMain {
 				{
 					writeOut();
 					writeOutCount = 0;
-					//System.out.println(i + " Collisions: " + collisionCount);
+					System.out.println(i + " Collisions: " + collisionCount);
 				}
+				
+				imgOut();
+				imgCount++;
 				
 		
 			}
 		}
 		catch(Exception e)
 		{
-			System.out.println("Config error");
+			System.out.println("Config error " + e.getMessage());
+			
 		}
 	}
 	public static void start()
 	{
 		double solarmass = 1.98892e30;
 		double blackHoleMass = BHoleMass;
+		
 		Body BH = new Body(0,0,0,0,(blackHoleMass),"Black Hole");
 		bodies[0] = BH;
 		//bodies[1] = new Body(0,0,0,0,(1e1*solarmass), "Black Hole");
+		
 		for(int i = 0; i < stars.size(); i++)
 		{
 			double px = stars.get(i).getX();
 			double py = stars.get(i).getY();
+			
+			if(Math.abs(px) > maxx)
+				maxx = Math.abs(px);
+				
+			if(Math.abs(py) > maxy)
+				maxy = Math.abs(py);
+			
 			double mass = stars.get(i).getMass();
 			
 			double magv = circlev(px,py,blackHoleMass);
@@ -167,6 +182,14 @@ public class GravMain {
 			
 		}catch(Exception e)
 		{}
+	}
+	public static void imgOut() throws Exception
+	{
+		String imgCountStr = String.format("%010d", imgCount);
+		String imgOutputDir = "/var/www/html/simoutput/img/img" + imgCountStr + ".jpeg";
+	
+		ScatterPlot s = new ScatterPlot(bodies);
+		s.writeImage(imgOutputDir,maxx*1.2,maxy*1.2);
 	}
 	public static void writeOut()
     {

@@ -101,8 +101,8 @@ public class Body {
 			//System.out.println("Collision: " + this.starClass + " with " + b.starClass);
 			if(this.starClass != "Black Hole")
 			{
-				if(b.starClass != "Black Hole")
-					System.out.println("Collision: " + this.starClass + " with " + b.starClass);
+				//if(b.starClass != "Black Hole")
+					//System.out.println("Collision: " + this.starClass + " with " + b.starClass);
 			}
 		}
 		
