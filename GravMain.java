@@ -329,12 +329,13 @@ public class GravMain {
 		
 		Set<Future<Body[]>> set = new HashSet<Future<Body[]>>();
 		
-		//int start = 0;
-		int end = Math.round(split);
+		int start = 0;
+		int splitI = Math.round(split);
+		int end = splitI;
 		//System.out.println("End point: " + end);
 		
 		//System.out.println("Creating tasks");
-		for(int start = 0; start < bodies.length; start++)
+		for(int i = 0; i < t; i++)
 		{
 			//System.out.println("Calling compute");
 			Callable<Body[]> callable = new Compute(bodies,start,end);
@@ -349,9 +350,9 @@ public class GravMain {
 			
 			set.add(future);
 			start = end;
-			end += end;
+			end += splitI + 1;
 			
-			if(end > bodies.length)
+			if(end >= bodies.length)
 				end = bodies.length;
 		}
 		//System.out.println("Number of Tasks: " + set.size());
@@ -374,8 +375,8 @@ public class GravMain {
 			int cEnd = ends.get(segCount);
 			
 			//System.out.println("Merge "  + segCount + " Start: " + cStart + " End: " +cEnd);
-			if(cStart > 0)
-				cStart--;
+			//if(cStart > 0)
+			//	cStart--;
 				
 			for(int i = cStart; i < cEnd; i++)
 			{
