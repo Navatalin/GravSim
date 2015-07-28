@@ -1,8 +1,9 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class GravMain {
 
@@ -27,24 +28,42 @@ public class GravMain {
 			outputPath = configs[5];
 		
 			stars = new ArrayList<Star>();
+			System.out.println("Reading Files");
 			readFile();
 			bodies = new Body[stars.size() + 1];
+			System.out.println("Initializing System");
 			start();
 			int maxSteps = Integer.parseInt(configs[0]);
 			int writeOutCount = 0;
 			int writeOutValue = Integer.parseInt(configs[1]);
-
+			
+			System.out.println("Begining loop");
 			for(int i = 0; i < maxSteps; i++)
 			{
-				addforces(bodies.length);
+				//addforces(bodies.length);
+				
+				//System.out.println("Starting Add forces");
+				try
+				{
+					MTAddForces(3);
+				}
+				catch(InterruptedException IE)
+				{
+					System.out.println(IE.getMessage());
+				}
+				catch(ExecutionException EE)
+				{
+					System.out.println(EE.getMessage());
+				}
+				
 				writeOutCount++;
 				if(writeOutCount >= writeOutValue)
 				{
 					writeOut();
 					writeOutCount = 0;
-					System.out.println(i + " Collisions: " + collisionCount);
+					//System.out.println(i + " Collisions: " + collisionCount);
 				}
-				
+				System.out.println("Output Image: " + i);
 				imgOut();
 				imgCount++;
 				
@@ -281,6 +300,91 @@ public class GravMain {
 		return configs;
 		
 	}
-
+	public static void MTAddForces(int t) throws InterruptedException, ExecutionException
+	{
+		float split = bodies.length/t;
+		
+		//System.out.println("Starting pool " + split);
+		//System.out.println("Starting Array Size: " + bodies.length);
+		
+		ExecutorService pool = Executors.newFixedThreadPool(t);
+		ArrayList<Integer> starts = new ArrayList<Integer>();
+		ArrayList<Integer> ends = new ArrayList<Integer>();
+		
+		Set<Future<Body[]>> set = new HashSet<Future<Body[]>>();
+		
+		//int start = 0;
+		int end = Math.round(split);
+		//System.out.println("End point: " + end);
+		
+		//System.out.println("Creating tasks");
+		for(int start = 0; start < bodies.length; start++)
+		{
+			//System.out.println("Calling compute");
+			Callable<Body[]> callable = new Compute(bodies,start,end);
+			
+			//System.out.println("Adding to pool");
+			Future<Body[]> future = pool.submit(callable);
+			
+			//System.out.println(start);
+			starts.add(start);
+			//System.out.println(end);
+			ends.add(end);
+			
+			set.add(future);
+			start = end;
+			end += end;
+			
+			if(end > bodies.length)
+				end = bodies.length;
+		}
+		//System.out.println("Number of Tasks: " + set.size());
+		
+		//System.out.println("Create new bodies array");
+		Body[] nBodies = new Body[bodies.length];
+		
+		int segCount = 0;
+		
+		//System.out.println("Merge Returns");
+		
+		//System.out.println(starts.size() + " " + ends.size());
+		
+		for(Future<Body[]> future : set)
+		{
+			//System.out.println("Get future data");
+			Body[] sub = future.get();
+			
+			int cStart = starts.get(segCount);
+			int cEnd = ends.get(segCount);
+			
+			//System.out.println("Merge "  + segCount + " Start: " + cStart + " End: " +cEnd);
+			if(cStart > 0)
+				cStart--;
+				
+			for(int i = cStart; i < cEnd; i++)
+			{
+				nBodies[i] = sub[i];
+			}
+			segCount++;
+		}
+		
+		//System.out.println("New Array count: " + nBodies.length + " Old Array count: " + bodies.length);
+		
+		System.arraycopy(nBodies,0,bodies,0,nBodies.length);
+		
+		//System.out.println("Do update");
+		for(int i = 0; i < bodies.length; i++)
+		{
+			//System.out.println(bodies[i]);
+			if(bodies[i].mass > 0)
+			{
+				//System.out.println("doing update: " + i);
+				//bodies[i].update(1e11);
+				bodies[i].update(TimeStep);
+			}
+		}
+		//System.out.println("Finished Update");
+	}
+	
 }
 
