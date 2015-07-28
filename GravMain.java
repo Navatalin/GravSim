@@ -400,6 +400,8 @@ public class GravMain {
 			}
 		}
 		//System.out.println("Finished Update");
+		pool.shutdown();
+		
 	}
 	
 }
