@@ -26,7 +26,7 @@ public class Compute implements Callable
 			if(bodies[i].mass > 0)
 			{
 				bodies[i].resetForce();
-				for(int j = start; j < n; j++)
+				for(int j = 0; j < bodies.length; j++)
 				{
 					if ( i != j && bodies[j].mass > 0)
 					{

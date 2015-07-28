@@ -16,6 +16,8 @@ public class GravMain {
 	public static double TimeStep = 0;
 	public static int imgCount = 0;
 	public static double maxx, maxy = 0;
+	public static String imgOutputPath = "";
+	public static int threadCount = 0;
 	
 	public static void main(String[] args) 
 	{
@@ -26,7 +28,9 @@ public class GravMain {
 			inputPath = configs[3];
 			TimeStep = Double.parseDouble(configs[4]);
 			outputPath = configs[5];
-		
+			imgOutputPath = configs[6];
+			threadCount = Integer.parseInt(configs[7]);
+			
 			stars = new ArrayList<Star>();
 			System.out.println("Reading Files");
 			readFile();
@@ -45,7 +49,7 @@ public class GravMain {
 				//System.out.println("Starting Add forces");
 				try
 				{
-					MTAddForces(3);
+					MTAddForces(threadCount);
 				}
 				catch(InterruptedException IE)
 				{
@@ -205,7 +209,7 @@ public class GravMain {
 	public static void imgOut() throws Exception
 	{
 		String imgCountStr = String.format("%010d", imgCount);
-		String imgOutputDir = "/var/www/html/simoutput/img/img" + imgCountStr + ".jpeg";
+		String imgOutputDir = imgOutputPath + "/img" + imgCountStr + ".jpeg";
 	
 		ScatterPlot s = new ScatterPlot(bodies);
 		s.writeImage(imgOutputDir,maxx*1.2,maxy*1.2);
@@ -234,7 +238,7 @@ public class GravMain {
     }
      public static String[] readConfig()
 	{
-	    String[] configs = new String[6];
+	    String[] configs = new String[8];
 		String path = "config.cfg";
 		BufferedReader br = null;
 		String line = "";
@@ -281,6 +285,18 @@ public class GravMain {
 				    {   
 				        String[] t = line.split("=");
 				        configs[5] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("ImgDir"))
+				    {
+				    	String[] t = line.split("=");
+				    	configs[6] = t[1].substring(1).trim();
+				    }
+				    else
+				    if(line.contains("Threads"))
+				    {
+				    	String[] t= line.split("=");
+				    	configs[7] = t[1].substring(1).trim();
 				    }
 				    
 			    }

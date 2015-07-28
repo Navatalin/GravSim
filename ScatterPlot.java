@@ -70,7 +70,7 @@ public class ScatterPlot
         
         File outputfile = new File(outputDir);
         
-        ChartUtilities.saveChartAsJPEG(outputfile,0.6f,chart,640,480);
+        ChartUtilities.saveChartAsJPEG(outputfile,0.8f,chart,1024,720);
         
     }
     private XYDataset populateData(Body[] bodies)
