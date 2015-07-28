@@ -35,7 +35,18 @@ public class Compute implements Callable
 					  
 						if(bodies[i].checkCollision(bodies[j]))
 						{
-							//System.out.println("Collision");
+							
+							
+							if(bodies[i].mass > bodies[j].mass)
+							{
+								bodies[i].hasCollided = true;
+							}
+							else
+							{
+								bodies[j].hasCollided = true;
+							}
+							/*
+							System.out.println("Collision: " +bodies[i].mass + " with " + bodies[j].mass);
 							//collisionCount++;
 							if(bodies[i].mass > bodies[j].mass)
 							{
@@ -49,6 +60,8 @@ public class Compute implements Callable
 								bodies[j].updateClass();
 								bodies[i].mass = 0.0;
 							}
+							System.out.println("Remaining mass: "+ bodies[i].mass+ " " +bodies[j].mass);
+							*/
 						}
 						
 					}

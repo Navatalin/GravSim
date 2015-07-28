@@ -67,7 +67,7 @@ public class GravMain {
 					writeOutCount = 0;
 					//System.out.println(i + " Collisions: " + collisionCount);
 				}
-				System.out.println("Output Image: " + i);
+				System.out.println("Output Image: " + i + " Collisions: " + collisionCount);
 				imgOut();
 				imgCount++;
 				
@@ -384,6 +384,7 @@ public class GravMain {
 			segCount++;
 		}
 		
+		pool.shutdown();
 		//System.out.println("New Array count: " + nBodies.length + " Old Array count: " + bodies.length);
 		
 		System.arraycopy(nBodies,0,bodies,0,nBodies.length);
@@ -396,11 +397,41 @@ public class GravMain {
 			{
 				//System.out.println("doing update: " + i);
 				//bodies[i].update(1e11);
+				
+				if(bodies[i].hasCollided)
+				{
+					for(int j = 0; j < bodies.length; j++)
+					{
+						if ( i != j && bodies[j].mass > 0)
+						{
+						
+							if(bodies[i].checkCollision(bodies[j]))
+							{
+								//System.out.println("Collision");
+								collisionCount++;
+								if(bodies[i].mass > bodies[j].mass)
+								{
+									bodies[i].mass += bodies[j].mass;
+									bodies[i].updateClass();
+									bodies[j].mass = 0.0;
+								}
+								else
+								{
+									bodies[j].mass += bodies[i].mass;
+									bodies[j].updateClass();
+									bodies[i].mass = 0.0;
+								}
+							}
+							
+						}
+					}
+				}
+				
 				bodies[i].update(TimeStep);
 			}
 		}
 		//System.out.println("Finished Update");
-		pool.shutdown();
+		
 		
 	}
 	

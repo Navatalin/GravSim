@@ -10,6 +10,7 @@ public class Body {
 	public double mass;
 	public String starClass;
 	public double radius;
+	public boolean hasCollided = false;
 	
 	public Body(double rx, double ry, double vx, double vy, double mass, String starClass)
 	{
@@ -33,7 +34,7 @@ public class Body {
 		}
 		else
 		{
-			radius = mass/4e10;
+			radius = mass/1.35e20;
 		}
 	}
 	public String getStarClass()
